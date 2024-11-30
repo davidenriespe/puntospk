@@ -1,0 +1,831 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/L.Control.Locate.min.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-search.css">
+        <link rel="stylesheet" href="css/filter.css">
+<link rel="stylesheet" href="css/nouislider.min.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/L.Control.Locate.min.js"></script>
+        <script src="js/multi-style-layer.js"></script>
+        <script src="js/leaflet-svg-shape-markers.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="js/leaflet-search.js"></script>
+        <script src="js/tailDT.js"></script>
+<script src="js/nouislider.min.js"></script>
+<script src="js/wNumb.js"></script>
+        <script src="data/CantonesInvolucrados_1.js"></script>
+        <script src="data/Poliducto_2.js"></script>
+        <script src="data/PKFC_3.js"></script>
+        <script src="data/PKN3_4.js"></script>
+        <script src="data/PKN2_5.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:25, minZoom:1
+        }).fitBounds([[-1.670020690274897,-81.44265725428664],[1.1044625860041768,-75.90866922379311]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // add class to format popup if it contains media
+		function addClassToPopupIfMedia(content, popup) {
+			var tempDiv = document.createElement('div');
+			tempDiv.innerHTML = content;
+			if (tempDiv.querySelector('td img')) {
+				popup._contentNode.classList.add('media');
+					// Delay to force the redraw
+					setTimeout(function() {
+						popup.update();
+					}, 10);
+			} else {
+				popup._contentNode.classList.remove('media');
+			}
+		}
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_OpenStreetMap_0');
+        map.getPane('pane_OpenStreetMap_0').style.zIndex = 400;
+        var layer_OpenStreetMap_0 = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            pane: 'pane_OpenStreetMap_0',
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 25,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
+        });
+        layer_OpenStreetMap_0;
+        map.addLayer(layer_OpenStreetMap_0);
+        function pop_CantonesInvolucrados_1(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">NOMBRE_CAN</th>\
+                        <td>' + (feature.properties['NOMBRE_CAN'] !== null ? autolinker.link(feature.properties['NOMBRE_CAN'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NOMBRE_PRO</th>\
+                        <td>' + (feature.properties['NOMBRE_PRO'] !== null ? autolinker.link(feature.properties['NOMBRE_PRO'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">area_can</th>\
+                        <td>' + (feature.properties['area_can'] !== null ? autolinker.link(feature.properties['area_can'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['porc'] !== null ? autolinker.link(feature.properties['porc'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_CantonesInvolucrados_1_0() {
+            return {
+                pane: 'pane_CantonesInvolucrados_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(178,223,138,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_CantonesInvolucrados_1');
+        map.getPane('pane_CantonesInvolucrados_1').style.zIndex = 401;
+        map.getPane('pane_CantonesInvolucrados_1').style['mix-blend-mode'] = 'normal';
+        var layer_CantonesInvolucrados_1 = new L.geoJson(json_CantonesInvolucrados_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_CantonesInvolucrados_1',
+            layerName: 'layer_CantonesInvolucrados_1',
+            pane: 'pane_CantonesInvolucrados_1',
+            onEachFeature: pop_CantonesInvolucrados_1,
+            style: style_CantonesInvolucrados_1_0,
+        });
+        bounds_group.addLayer(layer_CantonesInvolucrados_1);
+        map.addLayer(layer_CantonesInvolucrados_1);
+        function pop_Poliducto_2(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Nombre</th>\
+                        <td>' + (feature.properties['Nombre'] !== null ? autolinker.link(feature.properties['Nombre'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Longitud</th>\
+                        <td>' + (feature.properties['Longitud'] !== null ? autolinker.link(feature.properties['Longitud'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Diametro'] !== null ? autolinker.link(feature.properties['Diametro'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Productos_</th>\
+                        <td>' + (feature.properties['Productos_'] !== null ? autolinker.link(feature.properties['Productos_'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Poliducto_2_0() {
+            return {
+                pane: 'pane_Poliducto_2',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Poliducto_2');
+        map.getPane('pane_Poliducto_2').style.zIndex = 402;
+        map.getPane('pane_Poliducto_2').style['mix-blend-mode'] = 'normal';
+        var layer_Poliducto_2 = new L.geoJson(json_Poliducto_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Poliducto_2',
+            layerName: 'layer_Poliducto_2',
+            pane: 'pane_Poliducto_2',
+            onEachFeature: pop_Poliducto_2,
+            style: style_Poliducto_2_0,
+        });
+        bounds_group.addLayer(layer_Poliducto_2);
+        map.addLayer(layer_Poliducto_2);
+        function pop_PKFC_3(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['OBJECTID'] !== null ? autolinker.link(feature.properties['OBJECTID'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">EVENTO AMB</th>\
+                        <td>' + (feature.properties['EVENTO AMB'] !== null ? autolinker.link(feature.properties['EVENTO AMB'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">PLANIMETRI</th>\
+                        <td>' + (feature.properties['PLANIMETRI'] !== null ? autolinker.link(feature.properties['PLANIMETRI'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">FECHA</th>\
+                        <td>' + (feature.properties['FECHA'] !== null ? autolinker.link(feature.properties['FECHA'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">CAUSA</th>\
+                        <td>' + (feature.properties['CAUSA'] !== null ? autolinker.link(feature.properties['CAUSA'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">HIDROCAR</th>\
+                        <td>' + (feature.properties['HIDROCAR'] !== null ? autolinker.link(feature.properties['HIDROCAR'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NIVEL</th>\
+                        <td>' + (feature.properties['NIVEL'] !== null ? autolinker.link(feature.properties['NIVEL'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">TIPO</th>\
+                        <td>' + (feature.properties['TIPO'] !== null ? autolinker.link(feature.properties['TIPO'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_PKFC_3_0() {
+            return {
+                pane: 'pane_PKFC_3',
+                radius: 13.2,
+                opacity: 1,
+                color: 'rgba(184,8,8,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(51,160,44,1.0)',
+                interactive: true,
+            }
+        }
+        function style_PKFC_3_1() {
+            return {
+                pane: 'pane_PKFC_3',
+                radius: 14.4,
+                opacity: 1,
+                color: 'rgba(255,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(51,160,44,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_PKFC_3');
+        map.getPane('pane_PKFC_3').style.zIndex = 403;
+        map.getPane('pane_PKFC_3').style['mix-blend-mode'] = 'normal';
+        var layer_PKFC_3 = new L.geoJson.multiStyle(json_PKFC_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_PKFC_3',
+            layerName: 'layer_PKFC_3',
+            pane: 'pane_PKFC_3',
+            onEachFeature: pop_PKFC_3,
+            pointToLayers: [function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.shapeMarker(latlng, style_PKFC_3_0(feature));
+            },function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.shapeMarker(latlng, style_PKFC_3_1(feature));
+            },
+        ]});
+        bounds_group.addLayer(layer_PKFC_3);
+        map.addLayer(layer_PKFC_3);
+        function pop_PKN3_4(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="OBJECTID"colspan="2"><strong>OBJECTID</strong><br />' + (feature.properties['OBJECTID'] !== null ? autolinker.link(feature.properties['OBJECTID'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>EVENTO AMB</strong><br />' + (feature.properties['EVENTO AMB'] !== null ? autolinker.link(feature.properties['EVENTO AMB'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">PLANIMETRI</th>\
+                        <td>' + (feature.properties['PLANIMETRI'] !== null ? autolinker.link(feature.properties['PLANIMETRI'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">FECHA</th>\
+                        <td>' + (feature.properties['FECHA'] !== null ? autolinker.link(feature.properties['FECHA'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">CAUSA</th>\
+                        <td>' + (feature.properties['CAUSA'] !== null ? autolinker.link(feature.properties['CAUSA'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">HIDROCAR</th>\
+                        <td>' + (feature.properties['HIDROCAR'] !== null ? autolinker.link(feature.properties['HIDROCAR'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NIVEL</th>\
+                        <td>' + (feature.properties['NIVEL'] !== null ? autolinker.link(feature.properties['NIVEL'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">TIPO</th>\
+                        <td>' + (feature.properties['TIPO'] !== null ? autolinker.link(feature.properties['TIPO'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_PKN3_4_0() {
+            return {
+                pane: 'pane_PKN3_4',
+                radius: 13.2,
+                opacity: 1,
+                color: 'rgba(184,8,8,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(184,8,8,1.0)',
+                interactive: true,
+            }
+        }
+        function style_PKN3_4_1() {
+            return {
+                pane: 'pane_PKN3_4',
+                radius: 14.4,
+                opacity: 1,
+                color: 'rgba(255,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,0,0,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_PKN3_4');
+        map.getPane('pane_PKN3_4').style.zIndex = 404;
+        map.getPane('pane_PKN3_4').style['mix-blend-mode'] = 'normal';
+        var layer_PKN3_4 = new L.geoJson.multiStyle(json_PKN3_4, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_PKN3_4',
+            layerName: 'layer_PKN3_4',
+            pane: 'pane_PKN3_4',
+            onEachFeature: pop_PKN3_4,
+            pointToLayers: [function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.shapeMarker(latlng, style_PKN3_4_0(feature));
+            },function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.shapeMarker(latlng, style_PKN3_4_1(feature));
+            },
+        ]});
+        bounds_group.addLayer(layer_PKN3_4);
+        map.addLayer(layer_PKN3_4);
+        function pop_PKN2_5(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['OBJECTID'] !== null ? autolinker.link(feature.properties['OBJECTID'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">EVENTO AMB</th>\
+                        <td>' + (feature.properties['EVENTO AMB'] !== null ? autolinker.link(feature.properties['EVENTO AMB'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">PLANIMETRI</th>\
+                        <td>' + (feature.properties['PLANIMETRI'] !== null ? autolinker.link(feature.properties['PLANIMETRI'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">FECHA</th>\
+                        <td>' + (feature.properties['FECHA'] !== null ? autolinker.link(feature.properties['FECHA'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">CAUSA</th>\
+                        <td>' + (feature.properties['CAUSA'] !== null ? autolinker.link(feature.properties['CAUSA'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">HIDROCAR</th>\
+                        <td>' + (feature.properties['HIDROCAR'] !== null ? autolinker.link(feature.properties['HIDROCAR'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NIVEL</th>\
+                        <td>' + (feature.properties['NIVEL'] !== null ? autolinker.link(feature.properties['NIVEL'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">TIPO</th>\
+                        <td>' + (feature.properties['TIPO'] !== null ? autolinker.link(feature.properties['TIPO'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_PKN2_5_0() {
+            return {
+                pane: 'pane_PKN2_5',
+                radius: 13.2,
+                opacity: 1,
+                color: 'rgba(184,8,8,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(247,225,43,1.0)',
+                interactive: true,
+            }
+        }
+        function style_PKN2_5_1() {
+            return {
+                pane: 'pane_PKN2_5',
+                radius: 14.4,
+                opacity: 1,
+                color: 'rgba(255,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(247,225,43,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_PKN2_5');
+        map.getPane('pane_PKN2_5').style.zIndex = 405;
+        map.getPane('pane_PKN2_5').style['mix-blend-mode'] = 'normal';
+        var layer_PKN2_5 = new L.geoJson.multiStyle(json_PKN2_5, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_PKN2_5',
+            layerName: 'layer_PKN2_5',
+            pane: 'pane_PKN2_5',
+            onEachFeature: pop_PKN2_5,
+            pointToLayers: [function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.shapeMarker(latlng, style_PKN2_5_0(feature));
+            },function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.shapeMarker(latlng, style_PKN2_5_1(feature));
+            },
+        ]});
+        bounds_group.addLayer(layer_PKN2_5);
+        map.addLayer(layer_PKN2_5);
+        setBounds();
+        var i = 0;
+        layer_CantonesInvolucrados_1.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['NOMBRE_CAN'] !== null?String('<div style="color: #0091ca; font-size: 10pt; font-family: \'Cambria\', sans-serif;">' + layer.feature.properties['NOMBRE_CAN']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_CantonesInvolucrados_1'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        map.addControl(new L.Control.Search({
+            layer: layer_CantonesInvolucrados_1,
+            initial: false,
+            hideMarkerOnCollapse: true,
+            propertyName: 'NOMBRE_CAN'}));
+        document.getElementsByClassName('search-button')[0].className +=
+         ' fa fa-binoculars';
+        var mapDiv = document.getElementById('map');
+        var row = document.createElement('div');
+        row.className="row";
+        row.id="all";
+        row.style.height = "100%";
+        var col1 = document.createElement('div');
+        col1.className="col9";
+        col1.id = "mapWindow";
+        col1.style.height = "99%";
+        col1.style.width = "80%";
+        col1.style.display = "inline-block";
+        var col2 = document.createElement('div');
+        col2.className="col3";
+        col2.id = "menu";
+        col2.style.display = "inline-block";
+        mapDiv.parentNode.insertBefore(row, mapDiv);
+        document.getElementById("all").appendChild(col1);
+        document.getElementById("all").appendChild(col2);
+        col1.appendChild(mapDiv)
+        var Filters = {"EVENTO AMB": "str","NIVEL": "str","HIDROCAR": "str","NOMBRE_CAN": "str"};
+        function filterFunc() {
+          map.eachLayer(function(lyr){
+          if ("options" in lyr && "dataVar" in lyr["options"]){
+            features = this[lyr["options"]["dataVar"]].features.slice(0);
+            try{
+              for (key in Filters){
+                keyS = key.replace(/[^a-zA-Z0-9_]/g, "")
+                if (Filters[key] == "str" || Filters[key] == "bool"){
+                  var selection = [];
+                  var options = document.getElementById("sel_" + keyS).options
+                  for (var i=0; i < options.length; i++) {
+                    if (options[i].selected) selection.push(options[i].value);
+                  }
+                    try{
+                      if (key in features[0].properties){
+                        for (i = features.length - 1;
+                          i >= 0; --i){
+                          if (selection.indexOf(
+                          features[i].properties[key])<0
+                          && selection.length>0) {
+                          features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                  }
+                }
+                if (Filters[key] == "int"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (parseInt(features[i].properties[key])
+                          < sliderVals[0]
+                          || parseInt(features[i].properties[key])
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "real"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (features[i].properties[key]
+                          < sliderVals[0]
+                          || features[i].properties[key]
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "date"
+                  || Filters[key] == "datetime"
+                  || Filters[key] == "time"){
+                  try{
+                    if (key in features[0].properties){
+                      HTMLkey = key.replace(/[&\/\\#,+()$~%.'":*?<>{} ]/g, '');
+                      startdate = document.getElementById("dat_" +
+                        HTMLkey + "_date1").value.replace(" ", "T");
+                      enddate = document.getElementById("dat_" +
+                        HTMLkey + "_date2").value.replace(" ", "T");
+                      for (i = features.length - 1; i >= 0; --i){
+                        if (features[i].properties[key] < startdate
+                          || features[i].properties[key] > enddate){
+                          features.splice(i,1);
+                        }
+                      }
+                    }
+                  } catch(err){
+                  }
+                }
+              }
+            } catch(err){
+            }
+          this[lyr["options"]["layerName"]].clearLayers();
+          this[lyr["options"]["layerName"]].addData(features);
+        var i = 0;
+        layer_CantonesInvolucrados_1.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['NOMBRE_CAN'] !== null?String('<div style="color: #0091ca; font-size: 10pt; font-family: \'Cambria\', sans-serif;">' + layer.feature.properties['NOMBRE_CAN']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_CantonesInvolucrados_1'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+          }
+          })
+        }
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_EVENTOAMB = document.createElement('div');
+            div_EVENTOAMB.id = "div_EVENTOAMB";
+            div_EVENTOAMB.className= "filterselect";
+            document.getElementById("menu").appendChild(div_EVENTOAMB);
+            sel_EVENTOAMB = document.createElement('select');
+            sel_EVENTOAMB.multiple = true;
+            sel_EVENTOAMB.size = 10;
+            sel_EVENTOAMB.id = "sel_EVENTOAMB";
+            var EVENTOAMB_options_str = "<option value='' unselected></option>";
+            sel_EVENTOAMB.onchange = function(){filterFunc()};
+            EVENTOAMB_options_str  += '<option value="ESTACION FAISANES">ESTACION FAISANES</option>';
+            EVENTOAMB_options_str  += '<option value="PK100+200">PK100+200</option>';
+            EVENTOAMB_options_str  += '<option value="PK105+445">PK105+445</option>';
+            EVENTOAMB_options_str  += '<option value="PK107+728">PK107+728</option>';
+            EVENTOAMB_options_str  += '<option value="PK112+049">PK112+049</option>';
+            EVENTOAMB_options_str  += '<option value="PK112+763">PK112+763</option>';
+            EVENTOAMB_options_str  += '<option value="PK115+533">PK115+533</option>';
+            EVENTOAMB_options_str  += '<option value="PK116+900">PK116+900</option>';
+            EVENTOAMB_options_str  += '<option value="PK120+1062">PK120+1062</option>';
+            EVENTOAMB_options_str  += '<option value="PK128+045">PK128+045</option>';
+            EVENTOAMB_options_str  += '<option value="PK128+500">PK128+500</option>';
+            EVENTOAMB_options_str  += '<option value="PK129+575">PK129+575</option>';
+            EVENTOAMB_options_str  += '<option value="PK130+365">PK130+365</option>';
+            EVENTOAMB_options_str  += '<option value="PK134+533">PK134+533</option>';
+            EVENTOAMB_options_str  += '<option value="PK139+977">PK139+977</option>';
+            EVENTOAMB_options_str  += '<option value="PK142+961">PK142+961</option>';
+            EVENTOAMB_options_str  += '<option value="PK17+040 SDM">PK17+040 SDM</option>';
+            EVENTOAMB_options_str  += '<option value="PK191+762">PK191+762</option>';
+            EVENTOAMB_options_str  += '<option value="PK28+248">PK28+248</option>';
+            EVENTOAMB_options_str  += '<option value="PK87+600">PK87+600</option>';
+            EVENTOAMB_options_str  += '<option value="PK89+930">PK89+930</option>';
+            sel_EVENTOAMB.innerHTML = EVENTOAMB_options_str;
+            div_EVENTOAMB.appendChild(sel_EVENTOAMB);
+            var lab_EVENTOAMB = document.createElement('div');
+            lab_EVENTOAMB.innerHTML = 'EVENTO AMB';
+            lab_EVENTOAMB.className = 'filterlabel';
+            div_EVENTOAMB.appendChild(lab_EVENTOAMB);
+            var reset_EVENTOAMB = document.createElement('div');
+            reset_EVENTOAMB.innerHTML = 'clear filter';
+            reset_EVENTOAMB.className = 'filterlabel';
+            reset_EVENTOAMB.onclick = function() {
+                var options = document.getElementById("sel_EVENTOAMB").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_EVENTOAMB.appendChild(reset_EVENTOAMB);
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_NIVEL = document.createElement('div');
+            div_NIVEL.id = "div_NIVEL";
+            div_NIVEL.className= "filterselect";
+            document.getElementById("menu").appendChild(div_NIVEL);
+            sel_NIVEL = document.createElement('select');
+            sel_NIVEL.multiple = true;
+            sel_NIVEL.size = 4;
+            sel_NIVEL.id = "sel_NIVEL";
+            var NIVEL_options_str = "<option value='' unselected></option>";
+            sel_NIVEL.onchange = function(){filterFunc()};
+            NIVEL_options_str  += '<option value="FC">FC</option>';
+            NIVEL_options_str  += '<option value="N2">N2</option>';
+            NIVEL_options_str  += '<option value="N3">N3</option>';
+            NIVEL_options_str  += '<option value="SIN INFOR">SIN INFOR</option>';
+            sel_NIVEL.innerHTML = NIVEL_options_str;
+            div_NIVEL.appendChild(sel_NIVEL);
+            var lab_NIVEL = document.createElement('div');
+            lab_NIVEL.innerHTML = 'NIVEL';
+            lab_NIVEL.className = 'filterlabel';
+            div_NIVEL.appendChild(lab_NIVEL);
+            var reset_NIVEL = document.createElement('div');
+            reset_NIVEL.innerHTML = 'clear filter';
+            reset_NIVEL.className = 'filterlabel';
+            reset_NIVEL.onclick = function() {
+                var options = document.getElementById("sel_NIVEL").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_NIVEL.appendChild(reset_NIVEL);
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_HIDROCAR = document.createElement('div');
+            div_HIDROCAR.id = "div_HIDROCAR";
+            div_HIDROCAR.className= "filterselect";
+            document.getElementById("menu").appendChild(div_HIDROCAR);
+            sel_HIDROCAR = document.createElement('select');
+            sel_HIDROCAR.multiple = true;
+            sel_HIDROCAR.size = 10;
+            sel_HIDROCAR.id = "sel_HIDROCAR";
+            var HIDROCAR_options_str = "<option value='' unselected></option>";
+            sel_HIDROCAR.onchange = function(){filterFunc()};
+            HIDROCAR_options_str  += '<option value="DERIVADOS">DERIVADOS</option>';
+            HIDROCAR_options_str  += '<option value="DIESEL">DIESEL</option>';
+            HIDROCAR_options_str  += '<option value="DIESEL PREMIUM">DIESEL PREMIUM</option>';
+            HIDROCAR_options_str  += '<option value="DIESEL Y GASOLINA">DIESEL Y GASOLINA</option>';
+            HIDROCAR_options_str  += '<option value="GASOLINA">GASOLINA</option>';
+            HIDROCAR_options_str  += '<option value="GASOLINA EXTRA">GASOLINA EXTRA</option>';
+            HIDROCAR_options_str  += '<option value="GASOLINA SUPER Y EXT">GASOLINA SUPER Y EXT</option>';
+            HIDROCAR_options_str  += '<option value="GASOLINA Y DIESEL">GASOLINA Y DIESEL</option>';
+            HIDROCAR_options_str  += '<option value="JET FUEL">JET FUEL</option>';
+            HIDROCAR_options_str  += '<option value="SIN INFORMACION">SIN INFORMACION</option>';
+            sel_HIDROCAR.innerHTML = HIDROCAR_options_str;
+            div_HIDROCAR.appendChild(sel_HIDROCAR);
+            var lab_HIDROCAR = document.createElement('div');
+            lab_HIDROCAR.innerHTML = 'HIDROCAR';
+            lab_HIDROCAR.className = 'filterlabel';
+            div_HIDROCAR.appendChild(lab_HIDROCAR);
+            var reset_HIDROCAR = document.createElement('div');
+            reset_HIDROCAR.innerHTML = 'clear filter';
+            reset_HIDROCAR.className = 'filterlabel';
+            reset_HIDROCAR.onclick = function() {
+                var options = document.getElementById("sel_HIDROCAR").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_HIDROCAR.appendChild(reset_HIDROCAR);
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_NOMBRE_CAN = document.createElement('div');
+            div_NOMBRE_CAN.id = "div_NOMBRE_CAN";
+            div_NOMBRE_CAN.className= "filterselect";
+            document.getElementById("menu").appendChild(div_NOMBRE_CAN);
+            sel_NOMBRE_CAN = document.createElement('select');
+            sel_NOMBRE_CAN.multiple = true;
+            sel_NOMBRE_CAN.size = 4;
+            sel_NOMBRE_CAN.id = "sel_NOMBRE_CAN";
+            var NOMBRE_CAN_options_str = "<option value='' unselected></option>";
+            sel_NOMBRE_CAN.onchange = function(){filterFunc()};
+            NOMBRE_CAN_options_str  += '<option value="BUENA FE">BUENA FE</option>';
+            NOMBRE_CAN_options_str  += '<option value="QUEVEDO">QUEVEDO</option>';
+            NOMBRE_CAN_options_str  += '<option value="QUININDE">QUININDE</option>';
+            NOMBRE_CAN_options_str  += '<option value="SANTO DOMINGO">SANTO DOMINGO</option>';
+            sel_NOMBRE_CAN.innerHTML = NOMBRE_CAN_options_str;
+            div_NOMBRE_CAN.appendChild(sel_NOMBRE_CAN);
+            var lab_NOMBRE_CAN = document.createElement('div');
+            lab_NOMBRE_CAN.innerHTML = 'NOMBRE_CAN';
+            lab_NOMBRE_CAN.className = 'filterlabel';
+            div_NOMBRE_CAN.appendChild(lab_NOMBRE_CAN);
+            var reset_NOMBRE_CAN = document.createElement('div');
+            reset_NOMBRE_CAN.innerHTML = 'clear filter';
+            reset_NOMBRE_CAN.className = 'filterlabel';
+            reset_NOMBRE_CAN.onclick = function() {
+                var options = document.getElementById("sel_NOMBRE_CAN").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_NOMBRE_CAN.appendChild(reset_NOMBRE_CAN);
+        resetLabels([layer_CantonesInvolucrados_1,layer_Poliducto_2,layer_PKN3_4]);
+        map.on("zoomend", function(){
+            resetLabels([layer_CantonesInvolucrados_1,layer_Poliducto_2,layer_PKN3_4]);
+        });
+        map.on("layeradd", function(){
+            resetLabels([layer_CantonesInvolucrados_1,layer_Poliducto_2,layer_PKN3_4]);
+        });
+        map.on("layerremove", function(){
+            resetLabels([layer_CantonesInvolucrados_1,layer_Poliducto_2,layer_PKN3_4]);
+        });
+        </script>
+    </body>
+</html>
